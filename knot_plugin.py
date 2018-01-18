@@ -399,12 +399,9 @@ def add_knot(self, context, knot_string, z_scale, bias, scale, name="Knot"):
                 edges.append((prev, ix))
             prev = ix
             ix += 1
-        
-        
-            
+                            
     mesh = bpy.data.meshes.new(name=name)
-    mesh.from_pydata(verts, edges, [])
-    # useful for development when the mesh may be invalid.
+    mesh.from_pydata(verts, edges, [])    
     mesh.validate(verbose=True)
     object_data_add(context, mesh, operator=self)
     
@@ -419,27 +416,32 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         knot = bpy.data.texts[knottool.knot_text].as_string()
                 
         add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.scale, knottool.knot_text)
+        # convert mesh to curve
         if knottool.curve:
             bpy.ops.object.convert(target="CURVE")
 
             active = bpy.context.object
             curves = active.data
             
+            # apply beveling
             curves.fill_mode = 'FULL'
             curves.bevel_depth = knottool.extrude_width       
             curves.bevel_resolution = 6
             curves.use_uv_as_generated = True
         
+        # add smooth modifier
         if knottool.smoothing>0:
             bpy.ops.object.modifier_add(type="SMOOTH")
             active.modifiers['Smooth'].iterations = knottool.smoothing        
             
+        # add subdivision surface modifier
         if knottool.subdiv>0:
             bpy.ops.object.modifier_add(type="SUBSURF")
             active.modifiers['Subsurf'].levels = knottool.subdiv
             active.modifiers['Subsurf'].render_levels = knottool.subdiv
+            
 
-        
+        # recenter the cursor to the origin of the knot (mean position)
         saved_location = bpy.context.scene.cursor_location.copy()  # returns a copy of the vector    
         bpy.ops.object.mode_set(mode = 'EDIT')    
         if knottool.curve:
@@ -452,6 +454,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         # set the origin on the current object to the 3dcursor location
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
         # set 3dcursor location back to the stored location
+        bpy.context.scene.cursor_location = saved_location
         bpy.context.scene.cursor_location = saved_location
 
         return {'FINISHED'}
