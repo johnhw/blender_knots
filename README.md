@@ -102,7 +102,8 @@ piece of rope. A simple overhand knot only has one lead; a bend will have at lea
                  +--+
                  
                  
-             
+<img src="imgs/reef.png">             
+
 ### Figure of 8
         
         
@@ -113,6 +114,9 @@ piece of rope. A simple overhand knot only has one lead; a bend will have at lea
               +--|----->
                  |  |
                  +--+
+
+
+<img src="imgs/fig8.png">             
                  
                  
 ### Bowline
@@ -129,7 +133,7 @@ piece of rope. A simple overhand knot only has one lead; a bend will have at lea
             |  V|
             \---/
                         
-        
+<img src="imgs/bowline.png">                     
 
 
 ## Characters
