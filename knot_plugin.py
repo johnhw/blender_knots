@@ -12,7 +12,6 @@ bl_info = {
 }
 
 ### Knot parsing
-
 from collections import defaultdict
 
 char_dirs = {"^":(0,-1), "V":(0,1), ">":(1,0), "<":(-1,0), "O":(0,0)}
@@ -28,8 +27,9 @@ def nonempty(kmap, x, y):
 # U continue in current direction, but go underneath
 # O stop; end of lead
 # C check neighbours; must only be one neighbour not equal to current direction; take that
+# L change label of lead (from the label map)
 table = """
-.   O ^ V > <
+*   O ^ V > <
 O   C # # # #
 .   # . . . .
 ^   ^ ^ # U U
@@ -63,6 +63,9 @@ class Knot:
         self.map = {}
         self.inv_map = defaultdict(list)
         self.labels = {}       
+        self.crossovers = []
+        self.lead_map = defaultdict(list)
+        
         
         # represents a label object, that many
         # cells might refer to
@@ -71,6 +74,11 @@ class Knot:
                 self.label = ""
             def append(self, c):
                 self.label += c            
+                
+        def mark_label(x,y):
+            self.map[(x,y)] = 'L'
+            self.inv_map['L'].append((x,y))
+            self.labels[(x,y)] = label
                 
         for y, line in enumerate(s.splitlines()):
             mark_invalid = False # clear invalid area flag
@@ -81,7 +89,8 @@ class Knot:
                     if char=='[':
                         mark_invalid = True
                         label = Label()   # new label object                     
-                    if not char.isspace():
+                        mark_label(x,y)                        
+                    elif not char.isspace():
                         self.map[(x,y)] = char
                         self.inv_map[char].append((x,y))
                 else:                    
@@ -89,12 +98,13 @@ class Knot:
                         # label finished; record it
                         mark_invalid = False
                         #self.labels[label_start] = line[label_start[0]+1:x]                    
+                        mark_label(x,y)
                     else:
                         # mark these parts of the map as invalid
-                        self.map[(x,y)] = 'L'
-                        self.inv_map['L'].append((x,y))
+                        mark_label(x,y)
+                        # and append to the label (reading left-to-right)
                         label.append(char)
-                        self.labels[(x,y)] = label
+                        
                     
                         
     def choose(self, x, y, dx, dy):
@@ -113,19 +123,28 @@ class Knot:
         """Find each starting head"""                    
         heads = []
         
+        # add in digit characters
+        head_dirs = dict(char_dirs)
+        head_dirs.update({str(d):(0,0) for d in range(10)})
+        
+        
         # find all potential heads
-        for char, (x_off,y_off) in char_dirs.items():
+        for char, (x_off,y_off) in head_dirs.items():
             locations = self.inv_map[char]
             for x,y in locations:                                
                 if x_off==0 and y_off==0:
                     # undirected head
                     x_off, y_off = self.choose(x,y,0,0)
-                    heads.append((x,y,x_off,y_off))
+                    if char.isdigit():
+                        # named head
+                        heads.append((x,y,x_off,y_off,0,char))
+                    else:
+                        heads.append((x,y,x_off,y_off,0,""))
                 else:
                     # check if this is a head (no space beforehand)
                     prev_lead = self.map.get((x-x_off, y-y_off), None)                        
                     if prev_lead is None:                        
-                        heads.append((x,y,x_off,y_off))
+                        heads.append((x,y,x_off,y_off,0,""))
                         
         # sort by y then x
         return sorted(heads, key=lambda x:(x[1], x[0]))
@@ -158,18 +177,21 @@ class Knot:
                 char = kmap.get((j,i))
                 char = char or " "
                 print(char, end="")
-            print()                
+            print()
+                
                                 
     
     def trace_leads(self):
-        heads = self.find_heads()      
-        self.lead_map = defaultdict(list)
+        heads = self.find_heads()        
+        
         self.leads = []
+        self.over_map = defaultdict(list)
+        ix = 0
+        # trace each lead, starting from each head found
         for head in heads:
             lead = []
-            x,y,dx,dy = head
-            z = 0
-            name = ""
+            x,y,dx,dy,z,name = head
+                 
             lead.append((x,y,dx,dy,z,name))
             x,y = x+dx, y+dy
             while (x,y) in self.map:                
@@ -188,6 +210,8 @@ class Knot:
                 elif action=='U':
                     # dx,dy don't change
                     z = -1
+                    self.crossovers.append((x,y))
+                    
                 elif action=='C':
                     dx, dy = self.choose(x,y,dx,dy)
                     z = 0
@@ -197,19 +221,16 @@ class Knot:
                     self.print_error(x,y, "Invalid direction") 
                 elif action is None:
                     self.print_error(x,y,"Character %s unexpected"%char)
+                    
                 lead.append((x,y,dx,dy,z,name))
-                self.lead_map[(x,y)].append((dx,dy,z,name))
-                
+                self.over_map[(x,y)].append((ix, dx, dy, z))
+                # record where we are in the lead map
+                self.lead_map[(x,y)].append((lead, ix))
+                ix += 1
                 x, y = x+dx, y+dy
             self.leads.append(lead)
-        print(self.lead_map)
                
-    def is_crossing(self, x, y):
-        print((x,y))
-        cross = self.lead_map.get((x,y))
-        return cross is not None and len(cross)>1
-    
-                 
+            
     def show_lead(self, lead):
         kmap = {}
         for x,y,dx,dy,z,name in lead:
@@ -222,12 +243,37 @@ class Knot:
                         
         self.print_map(kmap)
         
+    def show_lead_directed(self, lead):
+        kmap = {}
+        for x,y,dx,dy,z,name in lead:
+            char = inv_dirs[(dx,dy)]
+            kmap[(x,y)] = char
+                        
+        self.print_map(kmap)
+        
+    def show_all_leads_directed(self):
+        kmap = {}
+        for lead in self.leads:
+            for x,y,dx,dy,z,name in lead:
+                char = inv_dirs[(dx,dy)]
+                kmap[(x,y)] = char
+                            
+        self.print_map(kmap)
+        
     def __init__(self, s):
         """Take a string representation of a knot, and fill 
         in the knot data from the string."""
         # generate map of characters
         self.parse_map(s)
         self.trace_leads()
+        
+        
+               
+    def is_crossing(self, x, y):
+        print((x,y))
+        cross = self.over_map.get((x,y))
+        return cross is not None and len(cross)>1
+    
        
         
         
@@ -370,7 +416,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
     def execute(self, context):
         scene = context.scene
         knottool = scene.knot_tool
-
+        knot = bpy.data.texts[knottool.knot_text].as_string()
                 
         add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.scale, knottool.knot_text)
         if knottool.curve:
