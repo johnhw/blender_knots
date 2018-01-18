@@ -389,11 +389,11 @@ def add_knot(self, context, knot_string, z_scale, bias, scale, name="Knot"):
         for x,y,dx,dy,z,name in lead:
             if knot_obj.is_crossing(x,y):
                 if z==-1:
-                    verts.append(Vector((x*scale,y*scale,scale*-z_scale * (bias+1)/2)))
+                    verts.append(Vector((x,y,-z_scale * (bias+1)/2)))
                 else:
-                    verts.append(Vector((scale*x,scale*y,scale*z_scale*  (bias+1)/2)))                    
+                    verts.append(Vector((x,y,z_scale*  (bias+1)/2)))                    
             else:
-                verts.append(Vector((scale*x,scale*y,0)))
+                verts.append(Vector((x,y,0)))
                 
             if prev is not None:
                 edges.append((prev, ix))
@@ -455,7 +455,10 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
         # set 3dcursor location back to the stored location
         bpy.context.scene.cursor_location = saved_location
-        bpy.context.scene.cursor_location = saved_location
+        bpy.ops.object.location_clear()
+        bpy.ops.object.rotation_clear()
+        bpy.ops.object.scale_clear()
+        bpy.ops.transform.resize(value=(knottool.scale, knottool.scale, knottool.scale))
 
         return {'FINISHED'}
 
