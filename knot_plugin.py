@@ -320,29 +320,6 @@ class KnotSettings(PropertyGroup):
         
     knot_text = StringProperty()
 
-    my_float = FloatProperty(
-        name = "Float Value",
-        description = "A float property",
-        default = 23.7,
-        min = 0.01,
-        max = 30.0
-        )
-
-    my_string = StringProperty(
-        name="User Input",
-        description=":",
-        default="",
-        maxlen=1024,
-        )
-
-    my_enum = EnumProperty(
-        name="Dropdown:",
-        description="Apply Data to attribute.",
-        items=[ ('OP1', "Option 1", ""),
-                ('OP2', "Option 2", ""),
-                ('OP3', "Option 3", ""),
-               ]
-        )
 
 
 
@@ -376,8 +353,7 @@ def add_knot(self, context, knot_string, z_scale, bias, scale, name="Knot"):
                 edges.append((prev, ix))
             prev = ix
             ix += 1
-        #if prev is not None:
-        #    edges.append((prev, ix))
+        
         
             
     mesh = bpy.data.meshes.new(name=name)
@@ -395,16 +371,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         scene = context.scene
         knottool = scene.knot_tool
 
-        # print the values to the console
-        print("Make Knot")
-        print("extrude state:", knottool.extrude)
-        print("knot:", knottool.knot_text)
-        knot = bpy.data.texts[knottool.knot_text].as_string()
-        print(knot)
-        
-        ######
-
-        
+                
         add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.scale, knottool.knot_text)
         if knottool.curve:
             bpy.ops.object.convert(target="CURVE")
@@ -435,6 +402,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
             bpy.ops.mesh.select_all(action='SELECT')        
         bpy.ops.view3d.snap_cursor_to_selected()
         bpy.ops.object.mode_set(mode = 'OBJECT')
+        
         # set the origin on the current object to the 3dcursor location
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
         # set 3dcursor location back to the stored location
@@ -457,35 +425,35 @@ class OBJECT_PT_my_panel(Panel):
         return True
 
     def draw(self, context):
+        # Draw the UI panel
         layout = self.layout
         scene = context.scene
         myknot = scene.knot_tool
 
-        layout.prop_search(context.scene.knot_tool, 'knot_text', bpy.data, 'texts', text="Knot")
-        
-        #layout.prop(myknot, "curve")
+        layout.prop_search(context.scene.knot_tool, 'knot_text', bpy.data, 'texts', text="Knot")               
         layout.prop(myknot, "scale")
-        #####
+        
 
+        layout.prop(myknot, "extrude")
+        
+        # extrusion box
         box = layout.box()
         box.label("Extrude")
-
         
-        box.prop(myknot, "extrude")
         box.prop(myknot, "extrude_width")
         box.prop(myknot, "smoothing")
         box.prop(myknot, "subdiv")
-        
-        ####        
+        box.enabled = myknot.extrude
+            
+            
+        # z shift box
         box = layout.box()
         box.label("Over/Under Z shift")
         box.prop(myknot, "z_depth")
         box.prop(myknot, "z_bias")
 
-        ####        
         
-        
-        ####
+        # Create knot button
         layout.operator("wm.make_knot")
 
 def register():
