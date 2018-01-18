@@ -251,9 +251,6 @@ from bpy.types import (Panel,
 
 
 
-# ------------------------------------------------------------------------
-#    store properties in the active scene
-# ------------------------------------------------------------------------
 
 class KnotSettings(PropertyGroup):
     
@@ -262,7 +259,13 @@ class KnotSettings(PropertyGroup):
         description="Select knot to choose",
         default = ""
         )
-    
+    scale = FloatProperty(
+        name="Scale",
+        description="Scaling of knot",
+        default = 0.3,
+        min=0.0,
+        max=5.0
+        )
 
     extrude = BoolProperty(
         name="Extrude",
@@ -341,9 +344,6 @@ class KnotSettings(PropertyGroup):
                ]
         )
 
-# ------------------------------------------------------------------------
-#    operators
-# ------------------------------------------------------------------------
 
 
 
@@ -353,7 +353,7 @@ from bpy.props import FloatVectorProperty
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 from mathutils import Vector
     
-def add_knot(self, context, knot_string, z_scale, bias, name="Knot"):
+def add_knot(self, context, knot_string, z_scale, bias, scale, name="Knot"):
     
     ix = 0
     verts = []
@@ -366,11 +366,11 @@ def add_knot(self, context, knot_string, z_scale, bias, name="Knot"):
         for x,y,dx,dy,z,name in lead:
             if knot_obj.is_crossing(x,y):
                 if z==-1:
-                    verts.append(Vector((x,y,-z_scale * (bias+1)/2)))
+                    verts.append(Vector((x*scale,y*scale,scale*-z_scale * (bias+1)/2)))
                 else:
-                    verts.append(Vector((x,y,z_scale*  (bias+1)/2)))                    
+                    verts.append(Vector((scale*x,scale*y,scale*z_scale*  (bias+1)/2)))                    
             else:
-                verts.append(Vector((x,y,0)))
+                verts.append(Vector((scale*x,scale*y,0)))
                 
             if prev is not None:
                 edges.append((prev, ix))
@@ -405,7 +405,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         ######
 
         
-        add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.knot_text)
+        add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.scale, knottool.knot_text)
         if knottool.curve:
             bpy.ops.object.convert(target="CURVE")
 
@@ -444,13 +444,6 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
 
 
 
-# The menu can also be called from scripts
-#bpy.ops.wm.call_menu(name=KnotTextItemMenu.bl_idname)
-
-# ------------------------------------------------------------------------
-#    my tool in objectmode
-# ------------------------------------------------------------------------
-
 class OBJECT_PT_my_panel(Panel):
     bl_idname = "OBJECT_PT_knot"
     bl_label = "Knot"
@@ -470,8 +463,8 @@ class OBJECT_PT_my_panel(Panel):
 
         layout.prop_search(context.scene.knot_tool, 'knot_text', bpy.data, 'texts', text="Knot")
         
-        layout.prop(myknot, "curve")
-        
+        #layout.prop(myknot, "curve")
+        layout.prop(myknot, "scale")
         #####
 
         box = layout.box()
@@ -492,19 +485,8 @@ class OBJECT_PT_my_panel(Panel):
         ####        
         
         
-      
-#        layout.prop(mytool, "my_enum", text="") 
-#        layout.prop(mytool, "my_int")
-#        layout.prop(mytool, "my_float")
-#        layout.prop(mytool, "my_string")
-
         ####
         layout.operator("wm.make_knot")
-
-
-# ------------------------------------------------------------------------
-# register and unregister
-# ------------------------------------------------------------------------
 
 def register():
     bpy.utils.register_module(__name__)
