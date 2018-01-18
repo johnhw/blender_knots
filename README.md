@@ -25,11 +25,13 @@ appropriate tension and curvature takes a bit of manual editing, but it is usual
 the download and select it. Make sure you tick the `Development: Knot generator` setting, then save the user settings.
 
 The knot generator is now available in the `Create` tab in `Object` mode of the 3D view (below the buttons for the various
-standard meshes). You need to have a text fragment with a knot description in it, which you will be able to select.
+standard meshes). You need to have a text fragment with a knot description in it, which you will be able to select from
+the panel to generate geometry from.
 <img src="imgs/panel.png">
 
 ## UI
 * `knot` select a text fragment (entered in the Blender text editor) to generate the knot from
+* `scale` overall scale of the whole knot.
 * `extrude` if enabled, this will turn on beveling for the knot. These options are provided to
 generate a good looking knot quickly -- you can get exactly the same effect by turning on bevel and
 adding the modifiers yourself.
@@ -76,14 +78,14 @@ The notation is a simple ASCII art representation of the path of the rope. The r
 can go in each of the four cardinal directions, and can go beneath existing rope.
 
 Every knot is represented as a collection of **leads**, where one a **lead** is a separate
-piece of rope. A simple overhand knot only has one lead; a bend will have at least two lead, and so on.
+piece of rope. A simple overhand knot only has one lead; a bend will have at least two leads, and so on.
 
 
 * **lead** a connected sequence representing one physical strand of rope 
 * **space** any cell without any character
 
-* Every line must have a **head**; either directed, undirected or numbered
-* A line may have an explicit **tail** (ending marker), either directed or undirected but this is optional
+* Every lead must have a **head**; either directed, undirected or numbered
+* A lead may have an explicit **tail** (ending marker), either directed or undirected but this is optional
 
 ## Examples
 
@@ -237,6 +239,7 @@ Indicates start of a lead. Labels a lead with the given number. Only one digit p
 
 May appear anywhere on the line excluding the end, including before the leader or in place of the leader. Always read left to right, regardless of line orientation. The lead must pass through the name to take effect.  Can be used as a comment if not adjacent to a lead.
 
+The Blender script does not use the names for anything at the moment.
 
 
     [a comment; this --- is ignored]
