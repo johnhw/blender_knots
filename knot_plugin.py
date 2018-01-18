@@ -364,7 +364,7 @@ class KnotSettings(PropertyGroup):
         max = 1
         )
         
-    knot_text = StringProperty()
+    
 
 
 
