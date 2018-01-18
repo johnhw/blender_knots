@@ -107,7 +107,7 @@ piece of rope. A simple overhand knot only has one lead; a bend will have at lea
 ### Figure of 8
         
         
-               +--+
+              +--+
               |  | 
         >-----|-----+
               |  |  |
