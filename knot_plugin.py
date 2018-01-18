@@ -1,13 +1,13 @@
 bl_info = {
     "name": "Knot generator",
-    "description": "",
+    "description": """Creates 3D meshes of knots from simple ASCII art descriptions.""",
     "author": "John H. Williamson",
     "version": (0, 0, 1),
     "blender": (2, 7, 0),
     "location": "3D View > Tools",
     "warning": "", # used for warning icon and text in addons panel
-    "wiki_url": "",
-    "tracker_url": "",
+    "wiki_url": "https://github.com/johnhw/blender_knots/wiki",
+    "tracker_url": "https://github.com/johnhw/blender_knots/issues",
     "category": "Development"
 }
 

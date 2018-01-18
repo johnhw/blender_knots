@@ -21,8 +21,8 @@ appropriate tension and curvature takes a bit of manual editing, but it is usual
 
 # Installing
 * Open **Blender**. You'll need 2.70 or greater.
-* Go to `File/User Preferences` and choose the `Install from File` button at the bottom. Find `blender_knots.py` from
-the download and select it. Make sure you tick the `Development: Knot generator` setting, then save the user settings.
+* Go to `File/User Preferences/Add Ons` and choose the `Install from File` button at the bottom. Find `blender_knots.py` from
+the download and select it. Make sure you tick the `Development: Knot generator` tick box to enable it, then save the user settings.
 
 The knot generator is now available in the `Create` tab in `Object` mode of the 3D view (below the buttons for the various
 standard meshes). You need to have a text fragment with a knot description in it, which you will be able to select from
