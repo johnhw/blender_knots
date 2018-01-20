@@ -114,9 +114,9 @@ class Knot:
         valid = [(vx, vy) for vx,vy in neighbours if not(vx==-dx and vy==-dy) and not(vx==0 and vy==0)]  
         
         if len(valid)<1:
-            self.print_error(x,y, "No neighbour to turn to")              
+            self.raise_error(x,y, "No neighbour to turn to")              
         if len(valid)>1:
-            self.print_error(x,y,"Ambiguous neighbour")            
+            self.raise_error(x,y,"Ambiguous neighbour")            
         return valid[0]
     
     def find_heads(self):
@@ -164,6 +164,25 @@ class Knot:
                     print(char, end="")
             print()
         raise KnotException(msg)
+        
+    def raise_error(self, x, y, msg=""):
+        """Print out a message with an error about the knot being parsed"""
+        k = 3
+        n = 6
+        str = [msg.center(n*2)]
+        
+        for i in range(-n,n+1):
+            for j in range(-n, n+1):
+                if (abs(j)==k and abs(i)<k) or (abs(j)<k and abs(i)==k):
+                    str.append("@")
+                    
+                else:
+                    char = self.map.get((x+j,y+i))
+                    char = char or " "
+                    str.append(char)
+                    
+            str.append("\n")
+        raise KnotException("".join(str))
     
     def print_map(self, kmap):      
         """Print out the entire map, in canonical form."""
@@ -218,9 +237,9 @@ class Knot:
                 elif action=='.':
                     break
                 elif action=='#':
-                    self.print_error(x,y, "Invalid direction") 
+                    self.raise_error(x,y, "Invalid direction") 
                 elif action is None:
-                    self.print_error(x,y,"Character %s unexpected"%char)
+                    self.raise_error(x,y,"Character %s unexpected"%char)
                     
                 lead.append((x,y,dx,dy,z,name))
                 self.over_map[(x,y)].append((ix, dx, dy, z))
@@ -241,7 +260,7 @@ class Knot:
             elif (x,y) in kmap:
                 kmap[(x,y)] = '+'            
                         
-        self.print_map(kmap)
+        self.raise_map(kmap)
         
     def show_lead_directed(self, lead):
         kmap = {}
@@ -384,6 +403,10 @@ def add_knot(self, context, knot_string, z_scale, bias, scale, name="Knot"):
     
     knot_obj = Knot(knot_string)
     
+    # must have at least on lead for this to work
+    if len(knot_obj.leads)<1:
+        raise KnotException("Warning: no valid knot found")        
+    
     for lead in knot_obj.leads:
         prev = None
         for x,y,dx,dy,z,name in lead:
@@ -415,7 +438,13 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         knottool = scene.knot_tool
         knot = bpy.data.texts[knottool.knot_text].as_string()
                 
-        add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.scale, knottool.knot_text)
+        try:
+            add_knot(self, context, knot, knottool.z_depth, knottool.z_bias, knottool.scale, knottool.knot_text)
+        except KnotException as ke:
+            print(str(ke))
+            self.report({'ERROR'}, str(ke))
+            return {"CANCELLED"}
+            
         # convert mesh to curve
         if knottool.curve:
             bpy.ops.object.convert(target="CURVE")
