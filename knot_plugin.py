@@ -412,11 +412,11 @@ def add_knot(self, context, knot_string, z_scale, bias, scale, name="Knot"):
         for x,y,dx,dy,z,name in lead:
             if knot_obj.is_crossing(x,y):
                 if z==-1:
-                    verts.append(Vector((x,y,-z_scale * (bias+1)/2)))
+                    verts.append(Vector((x,-y,-z_scale * (bias+1)/2)))
                 else:
-                    verts.append(Vector((x,y,z_scale*  (bias+1)/2)))                    
+                    verts.append(Vector((x,-y,z_scale*  (bias+1)/2)))                    
             else:
-                verts.append(Vector((x,y,0)))
+                verts.append(Vector((x,-y,0)))
                 
             if prev is not None:
                 edges.append((prev, ix))
