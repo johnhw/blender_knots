@@ -34,6 +34,7 @@ O   C # # # #
 .   # . . . .
 ^   ^ ^ # U U
 V   V # V U U
+v   V # V U U
 >   > U U > #
 <   < U U # <
 -   # U U > <
@@ -126,6 +127,8 @@ class Knot:
         # add in digit characters
         head_dirs = dict(char_dirs)
         head_dirs.update({str(d):(0,0) for d in range(10)})
+        # handle both cases of V
+        head_dirs["v"] = head_dirs["V"]
         
         
         # find all potential heads
@@ -549,3 +552,5 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+    
+    
