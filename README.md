@@ -1,4 +1,4 @@
-# Quick knots for Blender 2.7+
+# Quick knots for Blender 2.7x / 2.8x
 
 
              +--+
@@ -22,9 +22,11 @@ appropriate tension and curvature takes a bit of manual editing, but it is usual
 # Installing
 * Open **Blender**. You'll need 2.70 or greater. 
 * For 2.7x
+
         * Go to `File/User Preferences/Add Ons` and choose the `Install from File` button at the bottom. Find `knot_plugin.py` from
                 the download and select it. 
         * Make sure you tick the `Development: Knot generator` tick box to enable it, then save the user settings.
+
 * For 2.8x
         * Go to `Edit/Preferences/Add ons` and select `Install from file`. Find `knot_plugin_280.py` from the download and select it.
         * Make sure you tick the `Development: Knot generator` tick box to enable it, then save the user settings.
@@ -32,6 +34,7 @@ appropriate tension and curvature takes a bit of manual editing, but it is usual
 The knot generator is now available in the `Create` tab in `Object` mode of the 3D view (below the buttons for the various
 standard meshes). You need to have a text fragment with an ASCII knot description in it, which you will be able to select from
 the panel to generate geometry from.
+
 <img src="imgs/panel.png">
 
 ## UI
@@ -52,7 +55,7 @@ adding the modifiers yourself.
 * `Make Knot` creates the geometry
 
 ## What's included
-* `knot_plugin.py` The plugin itself
+* `knot_plugin.py` / `knot_plugin_280.py` The plugin itself
 * `knot_blank.blend` An empty template scene which you can generate a standard knot from a text file
 * `physics.blend` A simple example showing the use of physics to animate a knot tightening.
 
