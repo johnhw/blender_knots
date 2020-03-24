@@ -3,7 +3,7 @@ bl_info = {
     "description": """Creates 3D meshes of knots from simple ASCII art descriptions.""",
     "author": "John H. Williamson",
     "version": (0, 0, 1),
-    "blender": (2, 7, 0),
+    "blender": (2, 80, 0),
     "location": "3D View > Tools",
     "warning": "", # used for warning icon and text in addons panel
     "wiki_url": "https://github.com/johnhw/blender_knots/wiki",
@@ -323,7 +323,6 @@ from bpy.types import (Panel,
 
 
 
-
 class KnotSettings(PropertyGroup):
     
     knot_text = StringProperty(
@@ -478,7 +477,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
             
 
         # recenter the cursor to the origin of the knot (mean position)
-        saved_location = bpy.context.scene.cursor_location.copy()  # returns a copy of the vector    
+        saved_location = bpy.context.scene.cursor.location.copy()  # returns a copy of the vector    
         bpy.ops.object.mode_set(mode = 'EDIT')    
         if knottool.curve:
             bpy.ops.curve.select_all(action='SELECT')        
@@ -490,7 +489,7 @@ class KnotOperator(bpy.types.Operator,AddObjectHelper):
         # set the origin on the current object to the 3dcursor location
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
         # set 3dcursor location back to the stored location
-        bpy.context.scene.cursor_location = saved_location
+        bpy.context.scene.cursor.location = saved_location
         bpy.ops.object.location_clear()
         bpy.ops.object.rotation_clear()
         bpy.ops.object.scale_clear()
@@ -504,7 +503,7 @@ class OBJECT_PT_my_panel(Panel):
     bl_idname = "OBJECT_PT_knot"
     bl_label = "Knot"
     bl_space_type = "VIEW_3D"   
-    bl_region_type = "TOOLS"    
+    bl_region_type = "UI"    
     bl_category = "Create"
     bl_context = "objectmode"   
 
@@ -526,7 +525,7 @@ class OBJECT_PT_my_panel(Panel):
         
         # extrusion box
         box = layout.box()
-        box.label("Extrude")
+        box.label(text="Extrude")
         
         box.prop(myknot, "extrude_width")
         box.prop(myknot, "smoothing")
@@ -536,22 +535,31 @@ class OBJECT_PT_my_panel(Panel):
             
         # z shift box
         box = layout.box()
-        box.label("Over/Under Z shift")
+        box.label(text="Over/Under Z shift")
         box.prop(myknot, "z_depth")
         box.prop(myknot, "z_bias")
 
         
         # Create knot button
         layout.operator("wm.make_knot")
+        
+        
+classes = [
+    KnotSettings,
+    OBJECT_PT_my_panel,
+    KnotOperator
+    ]
+    
 
 def register():
-    bpy.utils.register_module(__name__)
+    
+    [bpy.utils.register_class(cls) for cls in classes]
     bpy.types.Scene.knot_tool = PointerProperty(type=KnotSettings)
 
 
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
+    [bpy.utils.unregister_class(cls) for cls in classes[::-1]]
     del bpy.types.Scene.knot_tool
 
 if __name__ == "__main__":
