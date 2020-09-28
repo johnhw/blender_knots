@@ -28,7 +28,10 @@ appropriate tension and curvature takes a bit of manual editing, but it is usual
         * Make sure you tick the `Development: Knot generator` tick box to enable it, then save the user settings.
 
 * For 2.8x
-        * Go to `Edit/Preferences/Add ons` and select `Install from file`. Find `knot_plugin_280.py` from the download and select it.
+
+        * Go to `Edit/Preferences/Add ons` 
+        * select `Install from file`. 
+        * Find `knot_plugin_280.py` from the download and select it.
         * Make sure you tick the `Development: Knot generator` tick box to enable it, then save the user settings.
 
 The knot generator is now available in the `Create` tab in `Object` mode of the 3D view (below the buttons for the various
@@ -50,7 +53,7 @@ adding the modifiers yourself.
 * `Over/Under z-shift` These control how the geometry should look where knot elements cross.
     * `depth` how much to move the rope going under over up/down where it crosses
     * `bias` whether the undergoing rope moves down (bias = 1), the overgoing rope goes up (bias=-1),
-    or the undergoing rope goes down by 0.5 and the undergoing rope up by 0.5 (bias=0.5)
+    or the undergoing rope goes down by 0.5 and the undergoing rope up by 0.5 (bias=0.0)
     
 * `Make Knot` creates the geometry
 
